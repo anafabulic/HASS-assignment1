@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Live PSI Indicator</title>
+
+    <!-- Pulling JQuery from Google API -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Pulling fonts from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;500;600&display=swap" rel="stylesheet"> 
+
+    <!-- CSS -->
+    <style>
+        body {
+            /*Gruvbox-Light colors*/
+            --bg0: #fbf1c7;
+            --bg1: #ebdbb2;
+            --bg2: #d5c4a1;
+            --bg3: #bdae93;
+            --bg4: #a89984;
+            --fg0: #282828;
+            --fg1: #3c3836;
+            --fg2: #504945;
+            --fg3: #665c54;
+            --fg4: #7c6f64;
+            --red: #cc241d;
+            --orange: #d65d0e;
+            --yellow: #d79921;
+            --green: #98971a;
+            --blue: #458588;
+            --purple: #b16286;
+            --aqua: #689d6a;
+            --gray: #7c6f64;
+            --red_d: #9d0006;
+            --orange_d: #af3a03;
+            --yellow_d: #b57614;
+            --green_d: #79740e;
+            --blue_d: #076678;
+            --purple_d: #8f3f71;
+            --aqua_d: #427b58;
+            --gray_d: #928374;
+
+            background: var(--bg0);
+            color: var(--fg0);
+            font-family: 'Inconsolata', 'Courier New', monospace;
+            font-size: 1em;
+            text-align: center;
+
+        }
+
+        h1 {
+            /* h1 formatting go here */
+        }
+
+        table {
+            border-collapse: collapse;
+            font: inherit;
+            width: 90%;
+            margin: auto;
+        }
+
+        td, th {
+            text-align: center;
+            padding: 0.5em 0 0.5em 1em;
+            min-width: 4.5em;
+        }
+
+        th {
+            text-transform: capitalize;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--bg2);
+        }
+
+        tr:nth-child(odd) {
+            background-color: var(--bg1);
+        }
+
+        tr:nth-child(1) {
+            background-color: var(--fg1);
+            color: var(--bg0);
+        }
+
+        .emph {
+            font-style: italic;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <h1>Live PSI update</h1>
+    <p><i>Last updated:</i> <span id="timestamp"></span></p>
+    <table id="psi_table"></table>
+    <!-- TODO: add an update button -->
+
+    <script>
+        let raw_data = {};
+        var timestamp = "";
+        var psi_data = "";
+
+        async function fetchdata() {
+            let response = await fetch('https://api.data.gov.sg/v1/environment/psi');
+            let data = await response.json();
+            return data;
+        }
+
+        fetchdata().then(data => {
+            
+            raw_data = data;
+            readings = raw_data["items"][0]["readings"];
+            
+            // Append timestamp
+            timestamp += Date(raw_data["items"][0]["timestamp"]);
+            $("#timestamp").append(timestamp);            
+
+            // Append locations
+            psi_data += "<tr><th>Readings</th>";
+            // Object.keys permits fetching of only one key & extracting the locations
+            $.each(readings[Object.keys(readings)[0]], function(key,value) {
+                    psi_data += "<th>"+key+"</th>";
+            });
+            psi_data += "</tr>";
+
+            // TODO: append locations in a specific order
+            // then append readings in the same specific order
+
+            // Append readings
+            $.each(readings, function(key,value) {
+                psi_data += "<tr><td>"+key+"</td>";
+                $.each(value, function(key,value) {
+                    psi_data += "<td>"+value+"</td>";
+                });
+                psi_data += "</tr>";
+            });
+            
+            // Write to the table
+            $("#psi_table").append(psi_data);
+        })
+    </script>
+
+</body>
+
+</html>
