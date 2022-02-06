@@ -18,39 +18,24 @@
     <style>
         body {
             /*Gruvbox-Light colors*/
-            --bg0: #fbf1c7;
-            --bg1: #ebdbb2;
-            --bg2: #d5c4a1;
-            --bg3: #bdae93;
-            --bg4: #a89984;
-            --fg0: #282828;
-            --fg1: #3c3836;
-            --fg2: #504945;
-            --fg3: #665c54;
-            --fg4: #7c6f64;
-            --red: #cc241d;
-            --org: #d65d0e;
-            --ylw: #d79921;
-            --grn: #98971a;
-            --blu: #458588;
-            --prp: #b16286;
-            --aqa: #689d6a;
-            --gry: #7c6f64;
-            --red_d: #9d0006;
-            --org_d: #af3a03;
-            --ylw_d: #b57614;
-            --grn_d: #79740e;
-            --blu_d: #076678;
-            --prp_d: #8f3f71;
-            --aqa_d: #427b58;
-            --gry_d: #928374;
+            --bg0: #fbf1c7;   --fg0: #282828;
+            --bg1: #ebdbb2;   --fg1: #3c3836;
+            --bg2: #d5c4a1;   --fg2: #504945;
+            --bg3: #bdae93;   --fg3: #665c54;
+            --bg4: #a89984;   --fg4: #7c6f64;
+            --red: #cc241d; --red_d: #9d0006;
+            --org: #d65d0e; --org_d: #af3a03;
+            --ylw: #d79921; --ylw_d: #b57614;
+            --grn: #98971a; --grn_d: #79740e;
+            --blu: #458588; --blu_d: #076678;
+            --prp: #b16286; --prp_d: #8f3f71;
+            --aqa: #689d6a; --aqa_d: #427b58;
+            --gry: #7c6f64; --gry_d: #928374;
 
             background: var(--bg0);
             color: var(--fg0);
             font-family: 'Inconsolata', 'Courier New', monospace;
-            font-size: 1em;
             text-align: center;
-
         }
 
         h1 {
@@ -58,15 +43,12 @@
             font-weight: bold;
         }
 
-        a:link {
-            color: var(--org);
-            text-decoration: none;
-        }
+        /* Link formatting */
+        a:link {color: var(--org_d);text-decoration: none;}
+        a:visited {color: var(--red);}
+        a:hover {color: var(--org);}
 
-        a:visited {
-            color: var(--org_d);
-        }
-
+        /* Cell formatting */
         table {
             border-collapse: collapse;
             font: inherit;
@@ -74,29 +56,67 @@
             margin: auto;
             max-width: 600px;
         }
-
         td, th {
             text-align: center;
             padding: 0.5em 1em 0.5em;
             min-width: 4.5em;
             white-space: nowrap;
         }
-
         th {
             text-transform: capitalize;
         }
 
-        tr:nth-child(even) {
-            background-color: var(--bg2);
-        }
+        tr:nth-child(even) {background-color: var(--bg2);}
+        tr:nth-child(odd) {background-color: var(--bg1);}
+        tr:nth-child(1) {background-color: var(--fg1);color: var(--bg0);}
+        
+        /* Tooltip snippet */
+        /* (Source: https://speckyboy.com/free-css-tooltip-snippets) */
 
-        tr:nth-child(odd) {
-            background-color: var(--bg1);
+        /************** Tool Tip Styles ********************************/
+        .tooltip {
+            display: inline-block;
+            position: relative;
+            margin-left: 0.5em;
         }
-
-        tr:nth-child(1) {
-            background-color: var(--fg1);
-            color: var(--bg0);
+        .tooltip .tooltip__info {
+            display: none;
+            background: var(--fg1);
+            border: 1px solid var(--fg1);
+            border-radius: 2px;
+            font-size: 1em;
+            padding: 1.2em;
+            position: absolute;
+            left: 30px;
+            top: -20px;
+            width: auto;
+            z-index: 2;
+        }
+        .tooltip .tooltip__info:before, .tooltip .tooltip__info:after {
+        content: "";
+        position: absolute;
+        left: -10px;
+        top: 7px;
+        border-style: solid;
+        border-width: 10px 10px 10px 0;
+        border-color: transparent var(--fg1);
+        }
+        .tooltip .tooltip__info:after {
+        left: -8px;
+        border-right-color: var(--fg1);
+        }
+        .tooltip .tooltip__info .info {
+        display: block;
+        color: var(--bg0);
+        }
+        .tooltip .tooltip__info .info__title {
+        color: var(--bg2);
+        }
+        .tooltip:hover .tooltip__info, .tooltip:focus .tooltip__info {
+        display: inline-block;
+        }
+        a:focus + .tooltip .tooltip__info {
+        display: inline-block;
         }
 
     </style>
@@ -107,14 +127,13 @@
     <h1>Live PSI update</h1>
     <p><span id="timestamp"></span></p>
     <table id="psi_table"></table>
-    <p><i>Source: </i><a href="https://data.gov.sg/dataset/psi" target="_blank">Pollutant Standards Index (PSI) - data.gov.sg</a></p>
-    <!-- TODO: add an update button -->
+    <p><em>Source: </em><a href="https://data.gov.sg/dataset/psi" target="_blank">Pollutant Standards Index (PSI) - data.gov.sg</a></p>
+    <!-- TODO: add an update button? -->
 
     <script>
         let raw_data = {};
         let readings = {};
         let timestamp = "";
-        let psi_data = "";
 
         // hardcoding desired order of columns and rows
         // as well as row definitions
@@ -134,6 +153,21 @@
             o3_sub_index: "O<sub>3</sub> (sub-index)"
         };
         let columns = ["central","north","south","east","west","national"];
+        let def_table = {
+            // Placeholder definitions
+            psi_twenty_four_hourly: "PSI (24h)",
+            pm10_twenty_four_hourly: "PM10 (24h)",
+            pm10_sub_index: "PM10 (sub-index)",
+            pm25_twenty_four_hourly: "PM25 (24h)",
+            pm25_sub_index: "PM25 (sub-index)",
+            so2_twenty_four_hourly: "SO<sub>2</sub> (24h)",
+            so2_sub_index: "SO<sub>2</sub> (sub-index)",
+            co_eight_hour_max: "CO (8h)",
+            co_sub_index: "CO (sub-index)",
+            no2_one_hour_max: "NO<sub>2</sub> (1h)",
+            o3_eight_hour_max: "O<sub>3</sub> (8h)",
+            o3_sub_index: "O<sub>3</sub> (sub-index)"
+        };
 
         async function fetchdata() {
             let response = await fetch('https://api.data.gov.sg/v1/environment/psi');
@@ -147,31 +181,44 @@
             readings = raw_data["items"][0]["readings"];
             
             // Append timestamp
-            timestamp += "<i>Last updated: </i>";
+            timestamp += "<em>Last updated: </em>";
             timestamp += Date(raw_data["items"][0]["timestamp"]);
             $("#timestamp").append(timestamp);            
 
-            // Append locations
-            psi_data += "<tr><th>Readings</th>";
-            $.each(columns, function(index, region) {
-                psi_data += "<th>"+region+"</th>";
+            // Populate psi_table with columns
+            $("#psi_table").append(`
+                <tr id="columns">
+                    <th style="text-align:left;">Readings</th>
+                </tr>
+            `);
+            $.each(columns, function(index, region){
+                $("#columns").append(`<th>${region}</th>`);
             });
-            psi_data += "</tr>";
 
-            // Append readings
-            // - column order follows hardcoded 'columns' object
-            // - rows order follows hardcoded 'rows' array
-            $.each(rows, function(key,value){
-                psi_data += "<tr><td>"+value+"</td>";
-                // function(index,region) is used to avoid confusion with parent loop
-                $.each(columns, function(index, region) {
-                    psi_data += "<td>"+readings[key][region]+"</td>";
+            // Populate psi_table with rows
+            $.each(rows, function(key, value) {
+                $("#psi_table").append(`
+                    <tr id="${key}">
+                        <td style="text-align:left;">${value}<span class="tooltip"><sub>[?]</sub>
+                            <p class="tooltip__info">
+                            <span class="info" id="${key}_hover">
+                            </span>
+                            </p>
+                        </span></td>
+                    </tr>
+                `);
+                $.each(columns, function(index, region){
+                    $(`#${key}`).append(`
+                        <td>${readings[key][region]}</td>
+                    `);
                 });
-                psi_data += "</tr>"
             });
-            
-            // Write to the table
-            $("#psi_table").append(psi_data);
+
+            // Append tooltip text (currently showing API's variable names)
+            $.each(def_table, function(key, value) {
+                let id = key + "_hover";
+                $("#" + id).append(key);
+            });
 
             // TODO: Further colouring based on pollutant level?
         });
