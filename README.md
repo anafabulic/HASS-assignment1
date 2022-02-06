@@ -1,7 +1,11 @@
-# HASS02.526.ASS1.anafabulic
- 
+## Assignment 1: Live PSI indicator
+
+Data drawn from https://data.gov.sg/dataset/psi.
+
 TODO:
-- HTML + CSS framework for tables and pretty colours
-- jQuery: fetch pollution data
-- Javascript: update HTML table
-- Cleanup: rearranging rows and columns, renaming variable names, add a map, add conditional colours (good/adequate/poor)?
+* ~~Rearrange rows and columns~~
+* ~~Rename row labels~~
+* Hardcode row labels into HTML; add tooltips in <script>
+* Host Google fonts in local repo 
+* Add a refresh button
+* Add a map 
