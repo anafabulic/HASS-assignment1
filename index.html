@@ -173,7 +173,7 @@
             let response = await fetch('https://api.data.gov.sg/v1/environment/psi');
             let data = await response.json();
             return data;
-        }
+        };
 
         fetchdata().then(data => {
             
